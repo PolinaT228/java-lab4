@@ -96,4 +96,4 @@ public class Clothes {
     public int hashCode() {
         return Objects.hash(name, size, price, quantity, category);
     }
-}git add .
+}
