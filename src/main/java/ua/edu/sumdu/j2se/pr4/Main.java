@@ -2,18 +2,19 @@ package ua.edu.sumdu.j2se.pr4;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Scanner;
 
 /**
- * Головний клас-драйвер для Практичної роботи №13 (Abstract classes, Comparable).
+ * Головний клас-драйвер для Практичної роботи №14 (Inner classes, Comparator).
  */
 public class Main {
     private static final String FILE_NAME = "input.txt";
 
     public static void main(String[] args) {
         System.out.println("==================================================");
-        System.out.println(" ПРАКТИЧНА РОБОТА №13");
-        System.out.println(" Тема: Абстрактні класи, інтерфейси, Comparable");
+        System.out.println(" ПРАКТИЧНА РОБОТА №14");
+        System.out.println(" Тема: Inner classes, interface Comparator");
         System.out.println(" Студентка групи ІН-41/2: Таратун Поліна");
         System.out.println("==================================================\n");
 
@@ -30,7 +31,7 @@ public class Main {
             System.out.println("1. Пошук товару");
             System.out.println("2. Додати новий товар (або оновити кількість)");
             System.out.println("3. Вивести інформацію про всі товари (звичайний список)");
-            System.out.println("4. Вивести відсортовану інформацію про всі товари (за назвою)");
+            System.out.println("4. Вивести відсортовану інформацію про всі товари (за критерієм)");
             System.out.println("5. Завершити роботу програми");
             System.out.print("Оберіть пункт меню (1-5): ");
 
@@ -149,16 +150,8 @@ public class Main {
                     break;
 
                 case 4:
-                    // Виведення відсортованої інформації про всі товари
-                    ArrayList<Clothes> sortedList = myStore.getSortedClothes();
-                    if (sortedList.isEmpty()) {
-                        System.out.println("Каталог магазину порожній. Сортування неможливе.");
-                    } else {
-                        System.out.println("\n--- Відсортований список товарів (за назвою) ---");
-                        for (Clothes item : sortedList) {
-                            System.out.println(item.toString());
-                        }
-                    }
+                    // Підменю вибору критерію сортування з використанням анонімних класів Comparator
+                    handleSortingMenu(myStore, scanner);
                     break;
 
                 case 5:
@@ -173,6 +166,89 @@ public class Main {
             }
         }
         scanner.close();
+    }
+
+    /**
+     * Підменю вибору критеріїв сортування за допомогою анонімних внутрішніх класів Comparator.
+     */
+    private static void handleSortingMenu(Store store, Scanner scanner) {
+        if (store.getClothesList().isEmpty()) {
+            System.out.println("Каталог магазину порожній. Сортування неможливе.");
+            return;
+        }
+
+        boolean sorting = true;
+        while (sorting) {
+            System.out.println("\n=== ОБЕРІТЬ КРИТЕРІЙ СОРТУВАННЯ ===");
+            System.out.println("1. Сортувати за ціною (від дешевих до дорогих)");
+            System.out.println("2. Сортувати за кількістю на складі (від меншої до більшої)");
+            System.out.println("3. Сортувати за розміром (за алфавітом)");
+            System.out.println("0. Повернутися в головне меню");
+            System.out.print("Оберіть пункт (0-3): ");
+
+            if (!scanner.hasNextInt()) {
+                System.out.println("Помилка! Введіть число від 0 до 3.");
+                scanner.next();
+                continue;
+            }
+
+            int sortChoice = scanner.nextInt();
+            scanner.nextLine();
+
+            ArrayList<Clothes> sortedResult = null;
+
+            switch (sortChoice) {
+                case 1:
+                    // Анонімний внутрішній клас для сортування за ціною
+                    Comparator<Clothes> priceComparator = new Comparator<Clothes>() {
+                        @Override
+                        public int compare(Clothes o1, Clothes o2) {
+                            return Double.compare(o1.getPrice(), o2.getPrice());
+                        }
+                    };
+                    sortedResult = store.getSortedClothesByComparator(priceComparator);
+                    System.out.println("\n--- Список, відсортований за ціною ---");
+                    break;
+
+                case 2:
+                    // Анонімний внутрішній клас для сортування за кількістю
+                    Comparator<Clothes> quantityComparator = new Comparator<Clothes>() {
+                        @Override
+                        public int compare(Clothes o1, Clothes o2) {
+                            return Integer.compare(o1.getQuantity(), o2.getQuantity());
+                        }
+                    };
+                    sortedResult = store.getSortedClothesByComparator(quantityComparator);
+                    System.out.println("\n--- Список, відсортований за кількістю ---");
+                    break;
+
+                case 3:
+                    // Анонімний внутрішній клас для сортування за розміром
+                    Comparator<Clothes> sizeComparator = new Comparator<Clothes>() {
+                        @Override
+                        public int compare(Clothes o1, Clothes o2) {
+                            return o1.getSize().compareToIgnoreCase(o2.getSize());
+                        }
+                    };
+                    sortedResult = store.getSortedClothesByComparator(sizeComparator);
+                    System.out.println("\n--- Список, відсортований за розміром ---");
+                    break;
+
+                case 0:
+                    sorting = false;
+                    continue;
+
+                default:
+                    System.out.println("Невірний вибір! Спробуйте ще раз.");
+                    continue;
+            }
+
+            if (sortedResult != null) {
+                for (Clothes item : sortedResult) {
+                    System.out.println(item.toString());
+                }
+            }
+        }
     }
 
     private static void handleSearchMenu(Store store, Scanner scanner) {
@@ -351,4 +427,4 @@ public class Main {
             System.out.println("Помилка читання з файлу: " + e.getMessage());
         }
     }
-}git add .
+}

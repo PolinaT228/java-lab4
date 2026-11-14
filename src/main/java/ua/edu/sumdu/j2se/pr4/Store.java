@@ -1,10 +1,11 @@
 package ua.edu.sumdu.j2se.pr4;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 
 /**
  * Клас-контейнер Store (Магазин), що реалізує агрегацію колекції одягу,
- * управління кількістю, пошук та сортування.
+ * управління кількістю, пошук та сортування за допомогою Comparator.
  */
 public class Store {
     private String storeName;
@@ -53,11 +54,13 @@ public class Store {
     }
 
     /**
-     * Повертає новий список товарів, відсортований за назвою (Comparable).
+     * Повертає новий список товарів, відсортований за заданим Comparator.
      */
-    public ArrayList<Clothes> getSortedClothes() {
+    public ArrayList<Clothes> getSortedClothesByComparator(Comparator<Clothes> comparator) {
         ArrayList<Clothes> sortedList = new ArrayList<>(clothesList);
-        sortedList.sort(null); // Використовує природний порядок (compareTo з класу Clothes)
+        if (comparator != null) {
+            sortedList.sort(comparator);
+        }
         return sortedList;
     }
 
