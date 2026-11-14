@@ -1,20 +1,28 @@
 package ua.edu.sumdu.j2se.pr4;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
- * Головний клас-драйвер із розширеним консольним меню.
+ * Головний клас-драйвер із повним функціоналом ієрархії, меню та роботи з файлом input.txt.
  */
 public class Main {
+    private static final String FILE_NAME = "input.txt";
+
     public static void main(String[] args) {
-        System.out.println(" ПРАКТИЧНА РОБОТА №8");
-        System.out.println(" Тема: Розширення ієрархії класів та поліморфне меню");
+        System.out.println("==================================================");
+        System.out.println(" ПРАКТИЧНА РОБОТА №9");
+        System.out.println(" Тема: Ієрархія та робота з файлами");
         System.out.println(" Студентка групи ІН-41/2: Таратун Поліна");
+        System.out.println("==================================================\n");
 
         Scanner scanner = new Scanner(System.in);
-        // Внутрішня колекція за замовчуванням порожня
-        ArrayList<Clothes> clothesList = new ArrayList<>();
+
+        // Автоматичне зчитування даних з файлу input.txt при запуску програми
+        ArrayList<Clothes> clothesList = loadFromFile();
+        System.out.println("Дані успішно завантажено з файлу. Кількість об'єктів: " + clothesList.size());
+
         boolean running = true;
 
         while (running) {
@@ -35,7 +43,6 @@ public class Main {
 
             switch (choice) {
                 case 1:
-                    // Підменю створення нового об'єкта
                     boolean creating = true;
                     while (creating) {
                         System.out.println("\n--- ВИБІР ТИПУ ОБ'ЄКТА ---");
@@ -57,7 +64,7 @@ public class Main {
                         scanner.nextLine();
 
                         if (subChoice == 6) {
-                            creating = false; // Повернення до головного меню
+                            creating = false;
                             break;
                         }
 
@@ -119,7 +126,7 @@ public class Main {
                             if (newItem != null) {
                                 clothesList.add(newItem);
                                 System.out.println("Об'єкт успішно створено та додано до колекції!");
-                                creating = false; // Вихід у головне меню після успішного створення
+                                creating = false;
                             }
 
                         } catch (Exception e) {
@@ -140,6 +147,9 @@ public class Main {
                     break;
 
                 case 3:
+                    // Автоматичне збереження актуального стану колекції у файл перед виходом
+                    saveToFile(clothesList);
+                    System.out.println("Дані успішно збережено у файл input.txt.");
                     running = false;
                     System.out.println("Роботу програми завершено.");
                     break;
@@ -149,5 +159,116 @@ public class Main {
             }
         }
         scanner.close();
+    }
+
+    /**
+     * Метод для збереження колекції об'єктів у файл input.txt.
+     */
+    public static void saveToFile(ArrayList<Clothes> clothesList) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME))) {
+            for (Clothes item : clothesList) {
+                StringBuilder sb = new StringBuilder();
+                if (item instanceof Pants) {
+                    sb.append("Pants;").append(item.getName()).append(";")
+                            .append(item.getSize()).append(";")
+                            .append(item.getPrice()).append(";")
+                            .append(item.getQuantity()).append(";")
+                            .append(item.getCategory().name()).append(";")
+                            .append(((Pants) item).isHasBelt());
+                } else if (item instanceof Shirts) {
+                    sb.append("Shirts;").append(item.getName()).append(";")
+                            .append(item.getSize()).append(";")
+                            .append(item.getPrice()).append(";")
+                            .append(item.getQuantity()).append(";")
+                            .append(item.getCategory().name()).append(";")
+                            .append(((Shirts) item).getSleeveLength());
+                } else if (item instanceof Jacket) {
+                    sb.append("Jacket;").append(item.getName()).append(";")
+                            .append(item.getSize()).append(";")
+                            .append(item.getPrice()).append(";")
+                            .append(item.getQuantity()).append(";")
+                            .append(item.getCategory().name()).append(";")
+                            .append(((Jacket) item).isHasHood());
+                } else if (item instanceof Socks) {
+                    sb.append("Socks;").append(item.getName()).append(";")
+                            .append(item.getSize()).append(";")
+                            .append(item.getPrice()).append(";")
+                            .append(item.getQuantity()).append(";")
+                            .append(item.getCategory().name()).append(";")
+                            .append(((Socks) item).getMaterial());
+                } else {
+                    sb.append("Clothes;").append(item.getName()).append(";")
+                            .append(item.getSize()).append(";")
+                            .append(item.getPrice()).append(";")
+                            .append(item.getQuantity()).append(";")
+                            .append(item.getCategory().name());
+                }
+                writer.write(sb.toString());
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            System.out.println("Помилка запису у файл: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Метод для завантаження колекції об'єктів з файлу input.txt.
+     */
+    public static ArrayList<Clothes> loadFromFile() {
+        ArrayList<Clothes> clothesList = new ArrayList<>();
+        File file = new File(FILE_NAME);
+        if (!file.exists()) {
+            return clothesList; // Якщо файл ще не створено, повертаємо порожню колекцію
+        }
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.trim().isEmpty()) {
+                    continue;
+                }
+                String[] parts = line.split(";");
+                if (parts.length < 6) {
+                    continue;
+                }
+
+                String type = parts[0];
+                String name = parts[1];
+                String size = parts[2];
+                double price = Double.parseDouble(parts[3]);
+                int quantity = Integer.parseInt(parts[4]);
+                ClothingCategory category = ClothingCategory.valueOf(parts[5]);
+
+                Clothes item = null;
+                switch (type) {
+                    case "Pants":
+                        boolean hasBelt = Boolean.parseBoolean(parts[6]);
+                        item = new Pants(name, size, price, quantity, category, hasBelt);
+                        break;
+                    case "Shirts":
+                        String sleeve = parts[6];
+                        item = new Shirts(name, size, price, quantity, category, sleeve);
+                        break;
+                    case "Jacket":
+                        boolean hasHood = Boolean.parseBoolean(parts[6]);
+                        item = new Jacket(name, size, price, quantity, category, hasHood);
+                        break;
+                    case "Socks":
+                        String material = parts[6];
+                        item = new Socks(name, size, price, quantity, category, material);
+                        break;
+                    case "Clothes":
+                        item = new Clothes(name, size, price, quantity, category);
+                        break;
+                }
+
+                if (item != null) {
+                    clothesList.add(item);
+                }
+            }
+        } catch (IOException | IllegalArgumentException e) {
+            System.out.println("Помилка читання з файлу: " + e.getMessage());
+        }
+        return clothesList;
     }
 }
