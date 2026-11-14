@@ -5,32 +5,34 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
- * Головний клас-драйвер із підтримкою пошуку об'єктів за критеріями,
- * ієрархією, меню та роботою з файлом input.txt.
+ * Головний клас-драйвер для Практичної роботи №11 (Агрегація через клас Store).
  */
 public class Main {
     private static final String FILE_NAME = "input.txt";
 
     public static void main(String[] args) {
         System.out.println("==================================================");
-        System.out.println(" ПРАКТИЧНА РОБОТА №10");
-        System.out.println(" Тема: Пошук у колекціях");
+        System.out.println(" ПРАКТИЧНА РОБОТА №11");
+        System.out.println(" Тема: Колекції, агрегація, класи-обгортки");
         System.out.println(" Студентка групи ІН-41/2: Таратун Поліна");
         System.out.println("==================================================\n");
 
         Scanner scanner = new Scanner(System.in);
 
+        // Створюємо об'єкт магазину (агрегація)
+        Store myStore = new Store("Модний Стиль");
+
         // Автоматичне зчитування даних з файлу input.txt при запуску програми
-        ArrayList<Clothes> clothesList = loadFromFile();
-        System.out.println("Дані успішно завантажено з файлу. Кількість об'єктів: " + clothesList.size());
+        loadStoreFromFile(myStore);
+        System.out.println("Магазин \"" + myStore.getStoreName() + "\" ініціалізовано. Товарів у каталозі: " + myStore.getClothesList().size());
 
         boolean running = true;
 
         while (running) {
-            System.out.println("\n=== ГОЛОВНЕ МЕНЮ ===");
-            System.out.println("1. Пошук об’єкта");
-            System.out.println("2. Створити новий об’єкт");
-            System.out.println("3. Вивести інформацію про всі об’єкти");
+            System.out.println("\n=== ГОЛОВНЕ МЕНЮ МАГАЗИНУ ===");
+            System.out.println("1. Пошук товару");
+            System.out.println("2. Додати новий товар (або оновити кількість)");
+            System.out.println("3. Вивести інформацію про всі товари");
             System.out.println("4. Завершити роботу програми");
             System.out.print("Оберіть пункт меню (1-4): ");
 
@@ -45,14 +47,13 @@ public class Main {
 
             switch (choice) {
                 case 1:
-                    // Підменю пошуку
-                    handleSearchMenu(clothesList, scanner);
+                    handleSearchMenu(myStore, scanner);
                     break;
 
                 case 2:
                     boolean creating = true;
                     while (creating) {
-                        System.out.println("\n--- ВИБІР ТИПУ ОБ'ЄКТА ---");
+                        System.out.println("\n--- ВИБІР ТИПУ ТОВАРУ ---");
                         System.out.println("1. Базовий одяг (Clothes)");
                         System.out.println("2. Штани (Pants)");
                         System.out.println("3. Сорочка (Shirts)");
@@ -90,7 +91,7 @@ public class Main {
                             System.out.print("Введіть ціну: ");
                             double price = Double.parseDouble(scanner.nextLine());
 
-                            System.out.print("Введіть кількість: ");
+                            System.out.print("Введіть кількість для додавання: ");
                             int quantity = Integer.parseInt(scanner.nextLine());
 
                             System.out.println("Оберіть категорію:");
@@ -106,33 +107,34 @@ public class Main {
 
                             switch (subChoice) {
                                 case 1:
-                                    newItem = new Clothes(name, size, price, quantity, category);
+                                    newItem = new Clothes(name, size, price, 1, category);
                                     break;
                                 case 2:
                                     System.out.print("Чи є ремінь? (true/false): ");
                                     boolean hasBelt = Boolean.parseBoolean(scanner.nextLine());
-                                    newItem = new Pants(name, size, price, quantity, category, hasBelt);
+                                    newItem = new Pants(name, size, price, 1, category, hasBelt);
                                     break;
                                 case 3:
                                     System.out.print("Довжина рукава: ");
                                     String sleeve = scanner.nextLine();
-                                    newItem = new Shirts(name, size, price, quantity, category, sleeve);
+                                    newItem = new Shirts(name, size, price, 1, category, sleeve);
                                     break;
                                 case 4:
                                     System.out.print("Чи є капюшон? (true/false): ");
                                     boolean hasHood = Boolean.parseBoolean(scanner.nextLine());
-                                    newItem = new Jacket(name, size, price, quantity, category, hasHood);
+                                    newItem = new Jacket(name, size, price, 1, category, hasHood);
                                     break;
                                 case 5:
                                     System.out.print("Введіть матеріал: ");
                                     String material = scanner.nextLine();
-                                    newItem = new Socks(name, size, price, quantity, category, material);
+                                    newItem = new Socks(name, size, price, 1, category, material);
                                     break;
                             }
 
                             if (newItem != null) {
-                                clothesList.add(newItem);
-                                System.out.println("Об'єкт успішно створено та додано до колекції!");
+                                // Використовуємо метод магазину згідно з вимогами завдань
+                                myStore.addNewClothes(newItem, quantity);
+                                System.out.println("Товар успішно додано (або оновлено його кількість) через Store!");
                                 creating = false;
                             }
 
@@ -143,20 +145,20 @@ public class Main {
                     break;
 
                 case 3:
-                    if (clothesList.isEmpty()) {
-                        System.out.println("Колекція одягу порожня.");
+                    if (myStore.getClothesList().isEmpty()) {
+                        System.out.println("Каталог магазину порожній.");
                     } else {
-                        System.out.println("\n--- Список усіх об'єктів у колекції ---");
-                        for (Clothes item : clothesList) {
+                        System.out.println("\n--- Список усіх товарів у магазині ---");
+                        for (Clothes item : myStore.getClothesList()) {
                             System.out.println(item.toString());
                         }
                     }
                     break;
 
                 case 4:
-                    // Автоматичне збереження актуального стану колекції у файл перед виходом
-                    saveToFile(clothesList);
-                    System.out.println("Дані успішно збережено у файл input.txt.");
+                    // Збереження стану магазину у файл перед виходом
+                    saveStoreToFile(myStore);
+                    System.out.println("Дані магазину успішно збережено у файл input.txt.");
                     running = false;
                     System.out.println("Роботу програми завершено.");
                     break;
@@ -169,14 +171,14 @@ public class Main {
     }
 
     /**
-     * Підменю пошуку об'єктів за критеріями.
+     * Підменю пошуку товарів через методи класу Store.
      */
-    private static void handleSearchMenu(ArrayList<Clothes> clothesList, Scanner scanner) {
+    private static void handleSearchMenu(Store store, Scanner scanner) {
         boolean searching = true;
         while (searching) {
             System.out.println("\n=== ПІДМЕНЮ ПОШУКУ ===");
             System.out.println("1. Пошук за категорією одягу");
-            System.out.println("2. Пошук за максимасною ціною");
+            System.out.println("2. Пошук за максимальною ціною");
             System.out.println("3. Пошук за назвою (частковий збіг)");
             System.out.println("4. Повернутися до головного меню");
             System.out.print("Оберіть критерій пошуку (1-4): ");
@@ -202,7 +204,7 @@ public class Main {
                         int catIndex = scanner.nextInt() - 1;
                         scanner.nextLine();
                         if (catIndex >= 0 && catIndex < categories.length) {
-                            ArrayList<Clothes> result = searchByCategory(clothesList, categories[catIndex]);
+                            ArrayList<Clothes> result = store.searchByCategory(categories[catIndex]);
                             printSearchResults(result);
                         } else {
                             System.out.println("Невірний номер категорії!");
@@ -218,7 +220,7 @@ public class Main {
                     if (scanner.hasNextDouble()) {
                         double maxPrice = scanner.nextDouble();
                         scanner.nextLine();
-                        ArrayList<Clothes> result = searchByMaxPrice(clothesList, maxPrice);
+                        ArrayList<Clothes> result = store.searchByMaxPrice(maxPrice);
                         printSearchResults(result);
                     } else {
                         System.out.println("Помилка введення ціни!");
@@ -229,7 +231,7 @@ public class Main {
                 case 3:
                     System.out.print("Введіть частину назви для пошуку: ");
                     String keyword = scanner.nextLine();
-                    ArrayList<Clothes> result = searchByNameKeyword(clothesList, keyword);
+                    ArrayList<Clothes> result = store.searchByNameKeyword(keyword);
                     printSearchResults(result);
                     break;
 
@@ -243,54 +245,11 @@ public class Main {
         }
     }
 
-    /**
-     * Метод пошуку об'єктів за категорією.
-     */
-    public static ArrayList<Clothes> searchByCategory(ArrayList<Clothes> list, ClothingCategory category) {
-        ArrayList<Clothes> result = new ArrayList<>();
-        for (Clothes item : list) {
-            if (item.getCategory() == category) {
-                result.add(item);
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Метод пошуку об'єктів за максималю ціною.
-     */
-    public static ArrayList<Clothes> searchByMaxPrice(ArrayList<Clothes> list, double maxPrice) {
-        ArrayList<Clothes> result = new ArrayList<>();
-        for (Clothes item : list) {
-            if (item.getPrice() <= maxPrice) {
-                result.add(item);
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Метод пошуку об'єктів за ключовим словом у назві.
-     */
-    public static ArrayList<Clothes> searchByNameKeyword(ArrayList<Clothes> list, String keyword) {
-        ArrayList<Clothes> result = new ArrayList<>();
-        String lowerKeyword = keyword.toLowerCase();
-        for (Clothes item : list) {
-            if (item.getName().toLowerCase().contains(lowerKeyword)) {
-                result.add(item);
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Допоміжний метод для виведення результатів пошуку.
-     */
     private static void printSearchResults(ArrayList<Clothes> result) {
         if (result.isEmpty()) {
-            System.out.println("\n[Результат пошуку]: Жоден об'єкт не відповідає умовам пошуку.");
+            System.out.println("\n[Результат пошуку]: Жоден товар не відповідає умовам пошуку.");
         } else {
-            System.out.println("\n[Результат пошуку] Знайдено об'єктів: " + result.size());
+            System.out.println("\n[Результат пошуку] Знайдено товарів: " + result.size());
             for (Clothes item : result) {
                 System.out.println(item.toString());
             }
@@ -298,11 +257,11 @@ public class Main {
     }
 
     /**
-     * Метод для збереження колекції об'єктів у файл input.txt.
+     * Збереження даних магазину у файл input.txt.
      */
-    public static void saveToFile(ArrayList<Clothes> clothesList) {
+    public static void saveStoreToFile(Store store) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME))) {
-            for (Clothes item : clothesList) {
+            for (Clothes item : store.getClothesList()) {
                 StringBuilder sb = new StringBuilder();
                 if (item instanceof Pants) {
                     sb.append("Pants;").append(item.getName()).append(";")
@@ -348,13 +307,12 @@ public class Main {
     }
 
     /**
-     * Метод для завантаження колекції об'єктів з файлу input.txt.
+     * Завантаження даних магазину з файлу input.txt за допомогою методу addNewClothes.
      */
-    public static ArrayList<Clothes> loadFromFile() {
-        ArrayList<Clothes> clothesList = new ArrayList<>();
+    public static void loadStoreFromFile(Store store) {
         File file = new File(FILE_NAME);
         if (!file.exists()) {
-            return clothesList;
+            return;
         }
 
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
@@ -379,32 +337,32 @@ public class Main {
                 switch (type) {
                     case "Pants":
                         boolean hasBelt = Boolean.parseBoolean(parts[6]);
-                        item = new Pants(name, size, price, quantity, category, hasBelt);
+                        item = new Pants(name, size, price, 1, category, hasBelt);
                         break;
                     case "Shirts":
                         String sleeve = parts[6];
-                        item = new Shirts(name, size, price, quantity, category, sleeve);
+                        item = new Shirts(name, size, price, 1, category, sleeve);
                         break;
                     case "Jacket":
                         boolean hasHood = Boolean.parseBoolean(parts[6]);
-                        item = new Jacket(name, size, price, quantity, category, hasHood);
+                        item = new Jacket(name, size, price, 1, category, hasHood);
                         break;
                     case "Socks":
                         String material = parts[6];
-                        item = new Socks(name, size, price, quantity, category, material);
+                        item = new Socks(name, size, price, 1, category, material);
                         break;
                     case "Clothes":
-                        item = new Clothes(name, size, price, quantity, category);
+                        item = new Clothes(name, size, price, 1, category);
                         break;
                 }
 
                 if (item != null) {
-                    clothesList.add(item);
+                    // Використовуємо метод addNewClothes згідно з варіантом
+                    store.addNewClothes(item, quantity);
                 }
             }
         } catch (IOException | IllegalArgumentException e) {
             System.out.println("Помилка читання з файлу: " + e.getMessage());
         }
-        return clothesList;
     }
 }
