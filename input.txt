@@ -1,0 +1,2 @@
+Pants;штани;М;100.0;1;OUTERWEAR;false
+Socks;Шкарпетки ;S;50.0;4;UNDERWEAR;Бавовона

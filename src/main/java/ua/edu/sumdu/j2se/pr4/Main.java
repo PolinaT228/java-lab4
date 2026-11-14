@@ -5,15 +5,16 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
- * Головний клас-драйвер із повним функціоналом ієрархії, меню та роботи з файлом input.txt.
+ * Головний клас-драйвер із підтримкою пошуку об'єктів за критеріями,
+ * ієрархією, меню та роботою з файлом input.txt.
  */
 public class Main {
     private static final String FILE_NAME = "input.txt";
 
     public static void main(String[] args) {
         System.out.println("==================================================");
-        System.out.println(" ПРАКТИЧНА РОБОТА №9");
-        System.out.println(" Тема: Ієрархія та робота з файлами");
+        System.out.println(" ПРАКТИЧНА РОБОТА №10");
+        System.out.println(" Тема: Пошук у колекціях");
         System.out.println(" Студентка групи ІН-41/2: Таратун Поліна");
         System.out.println("==================================================\n");
 
@@ -27,13 +28,14 @@ public class Main {
 
         while (running) {
             System.out.println("\n=== ГОЛОВНЕ МЕНЮ ===");
-            System.out.println("1. Створити новий об’єкт");
-            System.out.println("2. Вивести інформацію про всі об’єкти");
-            System.out.println("3. Завершити роботу програми");
-            System.out.print("Оберіть пункт меню (1-3): ");
+            System.out.println("1. Пошук об’єкта");
+            System.out.println("2. Створити новий об’єкт");
+            System.out.println("3. Вивести інформацію про всі об’єкти");
+            System.out.println("4. Завершити роботу програми");
+            System.out.print("Оберіть пункт меню (1-4): ");
 
             if (!scanner.hasNextInt()) {
-                System.out.println("Помилка! Введіть число від 1 до 3.");
+                System.out.println("Помилка! Введіть число від 1 до 4.");
                 scanner.next();
                 continue;
             }
@@ -43,6 +45,11 @@ public class Main {
 
             switch (choice) {
                 case 1:
+                    // Підменю пошуку
+                    handleSearchMenu(clothesList, scanner);
+                    break;
+
+                case 2:
                     boolean creating = true;
                     while (creating) {
                         System.out.println("\n--- ВИБІР ТИПУ ОБ'ЄКТА ---");
@@ -135,7 +142,7 @@ public class Main {
                     }
                     break;
 
-                case 2:
+                case 3:
                     if (clothesList.isEmpty()) {
                         System.out.println("Колекція одягу порожня.");
                     } else {
@@ -146,7 +153,7 @@ public class Main {
                     }
                     break;
 
-                case 3:
+                case 4:
                     // Автоматичне збереження актуального стану колекції у файл перед виходом
                     saveToFile(clothesList);
                     System.out.println("Дані успішно збережено у файл input.txt.");
@@ -155,10 +162,139 @@ public class Main {
                     break;
 
                 default:
-                    System.out.println("Невірний вибір! Оберіть від 1 до 3.");
+                    System.out.println("Невірний вибір! Оберіть від 1 до 4.");
             }
         }
         scanner.close();
+    }
+
+    /**
+     * Підменю пошуку об'єктів за критеріями.
+     */
+    private static void handleSearchMenu(ArrayList<Clothes> clothesList, Scanner scanner) {
+        boolean searching = true;
+        while (searching) {
+            System.out.println("\n=== ПІДМЕНЮ ПОШУКУ ===");
+            System.out.println("1. Пошук за категорією одягу");
+            System.out.println("2. Пошук за максимасною ціною");
+            System.out.println("3. Пошук за назвою (частковий збіг)");
+            System.out.println("4. Повернутися до головного меню");
+            System.out.print("Оберіть критерій пошуку (1-4): ");
+
+            if (!scanner.hasNextInt()) {
+                System.out.println("Помилка! Введіть число від 1 до 4.");
+                scanner.next();
+                continue;
+            }
+
+            int searchChoice = scanner.nextInt();
+            scanner.nextLine();
+
+            switch (searchChoice) {
+                case 1:
+                    System.out.println("Оберіть категорію для пошуку:");
+                    ClothingCategory[] categories = ClothingCategory.values();
+                    for (int i = 0; i < categories.length; i++) {
+                        System.out.println((i + 1) + ". " + categories[i].getDisplayName());
+                    }
+                    System.out.print("Вибір (1-" + categories.length + "): ");
+                    if (scanner.hasNextInt()) {
+                        int catIndex = scanner.nextInt() - 1;
+                        scanner.nextLine();
+                        if (catIndex >= 0 && catIndex < categories.length) {
+                            ArrayList<Clothes> result = searchByCategory(clothesList, categories[catIndex]);
+                            printSearchResults(result);
+                        } else {
+                            System.out.println("Невірний номер категорії!");
+                        }
+                    } else {
+                        System.out.println("Помилка введення!");
+                        scanner.next();
+                    }
+                    break;
+
+                case 2:
+                    System.out.print("Введіть максимальну ціну: ");
+                    if (scanner.hasNextDouble()) {
+                        double maxPrice = scanner.nextDouble();
+                        scanner.nextLine();
+                        ArrayList<Clothes> result = searchByMaxPrice(clothesList, maxPrice);
+                        printSearchResults(result);
+                    } else {
+                        System.out.println("Помилка введення ціни!");
+                        scanner.next();
+                    }
+                    break;
+
+                case 3:
+                    System.out.print("Введіть частину назви для пошуку: ");
+                    String keyword = scanner.nextLine();
+                    ArrayList<Clothes> result = searchByNameKeyword(clothesList, keyword);
+                    printSearchResults(result);
+                    break;
+
+                case 4:
+                    searching = false;
+                    break;
+
+                default:
+                    System.out.println("Невірний вибір! Оберіть від 1 до 4.");
+            }
+        }
+    }
+
+    /**
+     * Метод пошуку об'єктів за категорією.
+     */
+    public static ArrayList<Clothes> searchByCategory(ArrayList<Clothes> list, ClothingCategory category) {
+        ArrayList<Clothes> result = new ArrayList<>();
+        for (Clothes item : list) {
+            if (item.getCategory() == category) {
+                result.add(item);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Метод пошуку об'єктів за максималю ціною.
+     */
+    public static ArrayList<Clothes> searchByMaxPrice(ArrayList<Clothes> list, double maxPrice) {
+        ArrayList<Clothes> result = new ArrayList<>();
+        for (Clothes item : list) {
+            if (item.getPrice() <= maxPrice) {
+                result.add(item);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Метод пошуку об'єктів за ключовим словом у назві.
+     */
+    public static ArrayList<Clothes> searchByNameKeyword(ArrayList<Clothes> list, String keyword) {
+        ArrayList<Clothes> result = new ArrayList<>();
+        String lowerKeyword = keyword.toLowerCase();
+        for (Clothes item : list) {
+            if (item.getName().toLowerCase().contains(lowerKeyword)) {
+                result.add(item);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Допоміжний метод для виведення результатів пошуку.
+     */
+    private static void printSearchResults(ArrayList<Clothes> result) {
+        if (result.isEmpty()) {
+            System.out.println("\n[Результат пошуку]: Жоден об'єкт не відповідає умовам пошуку.");
+        } else {
+            System.out.println("\n[Результат пошуку] Знайдено об'єктів: " + result.size());
+            for (Clothes item : result) {
+                System.out.println(item.toString());
+            }
+        }
     }
 
     /**
@@ -218,7 +354,7 @@ public class Main {
         ArrayList<Clothes> clothesList = new ArrayList<>();
         File file = new File(FILE_NAME);
         if (!file.exists()) {
-            return clothesList; // Якщо файл ще не створено, повертаємо порожню колекцію
+            return clothesList;
         }
 
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
