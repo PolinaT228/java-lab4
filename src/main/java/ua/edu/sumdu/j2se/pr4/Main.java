@@ -5,24 +5,21 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
- * Головний клас-драйвер для Практичної роботи №11 (Агрегація через клас Store).
+ * Головний клас-драйвер для Практичної роботи №13 (Abstract classes, Comparable).
  */
 public class Main {
     private static final String FILE_NAME = "input.txt";
 
     public static void main(String[] args) {
         System.out.println("==================================================");
-        System.out.println(" ПРАКТИЧНА РОБОТА №11");
-        System.out.println(" Тема: Колекції, агрегація, класи-обгортки");
+        System.out.println(" ПРАКТИЧНА РОБОТА №13");
+        System.out.println(" Тема: Абстрактні класи, інтерфейси, Comparable");
         System.out.println(" Студентка групи ІН-41/2: Таратун Поліна");
         System.out.println("==================================================\n");
 
         Scanner scanner = new Scanner(System.in);
-
-        // Створюємо об'єкт магазину (агрегація)
         Store myStore = new Store("Модний Стиль");
 
-        // Автоматичне зчитування даних з файлу input.txt при запуску програми
         loadStoreFromFile(myStore);
         System.out.println("Магазин \"" + myStore.getStoreName() + "\" ініціалізовано. Товарів у каталозі: " + myStore.getClothesList().size());
 
@@ -32,12 +29,13 @@ public class Main {
             System.out.println("\n=== ГОЛОВНЕ МЕНЮ МАГАЗИНУ ===");
             System.out.println("1. Пошук товару");
             System.out.println("2. Додати новий товар (або оновити кількість)");
-            System.out.println("3. Вивести інформацію про всі товари");
-            System.out.println("4. Завершити роботу програми");
-            System.out.print("Оберіть пункт меню (1-4): ");
+            System.out.println("3. Вивести інформацію про всі товари (звичайний список)");
+            System.out.println("4. Вивести відсортовану інформацію про всі товари (за назвою)");
+            System.out.println("5. Завершити роботу програми");
+            System.out.print("Оберіть пункт меню (1-5): ");
 
             if (!scanner.hasNextInt()) {
-                System.out.println("Помилка! Введіть число від 1 до 4.");
+                System.out.println("Помилка! Введіть число від 1 до 5.");
                 scanner.next();
                 continue;
             }
@@ -54,16 +52,15 @@ public class Main {
                     boolean creating = true;
                     while (creating) {
                         System.out.println("\n--- ВИБІР ТИПУ ТОВАРУ ---");
-                        System.out.println("1. Базовий одяг (Clothes)");
-                        System.out.println("2. Штани (Pants)");
-                        System.out.println("3. Сорочка (Shirts)");
-                        System.out.println("4. Куртка (Jacket)");
-                        System.out.println("5. Шкарпетки (Socks)");
-                        System.out.println("6. Повернутися до головного меню");
-                        System.out.print("Оберіть тип (1-6): ");
+                        System.out.println("1. Штани (Pants)");
+                        System.out.println("2. Сорочка (Shirts)");
+                        System.out.println("3. Куртка (Jacket)");
+                        System.out.println("4. Шкарпетки (Socks)");
+                        System.out.println("5. Повернутися до головного меню");
+                        System.out.print("Оберіть тип (1-5): ");
 
                         if (!scanner.hasNextInt()) {
-                            System.out.println("Помилка! Введіть число від 1 до 6.");
+                            System.out.println("Помилка! Введіть число від 1 до 5.");
                             scanner.next();
                             continue;
                         }
@@ -71,12 +68,12 @@ public class Main {
                         int subChoice = scanner.nextInt();
                         scanner.nextLine();
 
-                        if (subChoice == 6) {
+                        if (subChoice == 5) {
                             creating = false;
                             break;
                         }
 
-                        if (subChoice < 1 || subChoice > 5) {
+                        if (subChoice < 1 || subChoice > 4) {
                             System.out.println("Невірний вибір! Спробуйте ще раз.");
                             continue;
                         }
@@ -107,24 +104,21 @@ public class Main {
 
                             switch (subChoice) {
                                 case 1:
-                                    newItem = new Clothes(name, size, price, 1, category);
-                                    break;
-                                case 2:
                                     System.out.print("Чи є ремінь? (true/false): ");
                                     boolean hasBelt = Boolean.parseBoolean(scanner.nextLine());
                                     newItem = new Pants(name, size, price, 1, category, hasBelt);
                                     break;
-                                case 3:
+                                case 2:
                                     System.out.print("Довжина рукава: ");
                                     String sleeve = scanner.nextLine();
                                     newItem = new Shirts(name, size, price, 1, category, sleeve);
                                     break;
-                                case 4:
+                                case 3:
                                     System.out.print("Чи є капюшон? (true/false): ");
                                     boolean hasHood = Boolean.parseBoolean(scanner.nextLine());
                                     newItem = new Jacket(name, size, price, 1, category, hasHood);
                                     break;
-                                case 5:
+                                case 4:
                                     System.out.print("Введіть матеріал: ");
                                     String material = scanner.nextLine();
                                     newItem = new Socks(name, size, price, 1, category, material);
@@ -132,9 +126,8 @@ public class Main {
                             }
 
                             if (newItem != null) {
-                                // Використовуємо метод магазину згідно з вимогами завдань
                                 myStore.addNewClothes(newItem, quantity);
-                                System.out.println("Товар успішно додано (або оновлено його кількість) через Store!");
+                                System.out.println("Товар успішно додано до каталогу!");
                                 creating = false;
                             }
 
@@ -156,7 +149,19 @@ public class Main {
                     break;
 
                 case 4:
-                    // Збереження стану магазину у файл перед виходом
+                    // Виведення відсортованої інформації про всі товари
+                    ArrayList<Clothes> sortedList = myStore.getSortedClothes();
+                    if (sortedList.isEmpty()) {
+                        System.out.println("Каталог магазину порожній. Сортування неможливе.");
+                    } else {
+                        System.out.println("\n--- Відсортований список товарів (за назвою) ---");
+                        for (Clothes item : sortedList) {
+                            System.out.println(item.toString());
+                        }
+                    }
+                    break;
+
+                case 5:
                     saveStoreToFile(myStore);
                     System.out.println("Дані магазину успішно збережено у файл input.txt.");
                     running = false;
@@ -164,15 +169,12 @@ public class Main {
                     break;
 
                 default:
-                    System.out.println("Невірний вибір! Оберіть від 1 до 4.");
+                    System.out.println("Невірний вибір! Оберіть від 1 до 5.");
             }
         }
         scanner.close();
     }
 
-    /**
-     * Підменю пошуку товарів через методи класу Store.
-     */
     private static void handleSearchMenu(Store store, Scanner scanner) {
         boolean searching = true;
         while (searching) {
@@ -256,9 +258,6 @@ public class Main {
         }
     }
 
-    /**
-     * Збереження даних магазину у файл input.txt.
-     */
     public static void saveStoreToFile(Store store) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME))) {
             for (Clothes item : store.getClothesList()) {
@@ -291,12 +290,6 @@ public class Main {
                             .append(item.getQuantity()).append(";")
                             .append(item.getCategory().name()).append(";")
                             .append(((Socks) item).getMaterial());
-                } else {
-                    sb.append("Clothes;").append(item.getName()).append(";")
-                            .append(item.getSize()).append(";")
-                            .append(item.getPrice()).append(";")
-                            .append(item.getQuantity()).append(";")
-                            .append(item.getCategory().name());
                 }
                 writer.write(sb.toString());
                 writer.newLine();
@@ -306,9 +299,6 @@ public class Main {
         }
     }
 
-    /**
-     * Завантаження даних магазину з файлу input.txt за допомогою методу addNewClothes.
-     */
     public static void loadStoreFromFile(Store store) {
         File file = new File(FILE_NAME);
         if (!file.exists()) {
@@ -351,13 +341,9 @@ public class Main {
                         String material = parts[6];
                         item = new Socks(name, size, price, 1, category, material);
                         break;
-                    case "Clothes":
-                        item = new Clothes(name, size, price, 1, category);
-                        break;
                 }
 
                 if (item != null) {
-                    // Використовуємо метод addNewClothes згідно з варіантом
                     store.addNewClothes(item, quantity);
                 }
             }
@@ -365,4 +351,4 @@ public class Main {
             System.out.println("Помилка читання з файлу: " + e.getMessage());
         }
     }
-}
+}git add .

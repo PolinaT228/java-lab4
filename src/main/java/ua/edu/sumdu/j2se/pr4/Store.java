@@ -3,8 +3,8 @@ package ua.edu.sumdu.j2se.pr4;
 import java.util.ArrayList;
 
 /**
- * Клас-контейнер Store (Магазин), що реалізує агрегацію колекції одягу
- * та управляє кількістю товарів і пошуком.
+ * Клас-контейнер Store (Магазин), що реалізує агрегацію колекції одягу,
+ * управління кількістю, пошук та сортування.
  */
 public class Store {
     private String storeName;
@@ -50,6 +50,15 @@ public class Store {
             cl.setQuantity(quantity);
             clothesList.add(cl);
         }
+    }
+
+    /**
+     * Повертає новий список товарів, відсортований за назвою (Comparable).
+     */
+    public ArrayList<Clothes> getSortedClothes() {
+        ArrayList<Clothes> sortedList = new ArrayList<>(clothesList);
+        sortedList.sort(null); // Використовує природний порядок (compareTo з класу Clothes)
+        return sortedList;
     }
 
     /**

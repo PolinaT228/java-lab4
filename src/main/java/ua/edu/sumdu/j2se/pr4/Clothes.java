@@ -3,23 +3,15 @@ package ua.edu.sumdu.j2se.pr4;
 import java.util.Objects;
 
 /**
- package ua.edu.sumdu.j2se.pr4;
-
- import java.util.Objects;
-
- /**
- * Базовий клас, що описує предметну область "Одяг".
+ * Абстрактний батьківський клас Одяг (Clothes), що реалізує Comparable для сортування за назвою.
  */
-public class Clothes {
+public abstract class Clothes implements Comparable<Clothes> {
     protected String name;
     protected String size;
     protected double price;
     protected int quantity;
     protected ClothingCategory category;
 
-    /**
-     * Конструктор з параметрами та валідацією.
-     */
     public Clothes(String name, String size, double price, int quantity, ClothingCategory category) {
         setName(name);
         setSize(size);
@@ -28,7 +20,6 @@ public class Clothes {
         setCategory(category);
     }
 
-    // Гетери та сетери
     public String getName() { return name; }
     public void setName(String name) {
         if (name == null || name.trim().isEmpty()) {
@@ -47,8 +38,8 @@ public class Clothes {
 
     public double getPrice() { return price; }
     public void setPrice(double price) {
-        if (price <= 0) {
-            throw new IllegalArgumentException("Ціна повинна бути більшою за 0");
+        if (price < 0) {
+            throw new IllegalArgumentException("Ціна не може бути від'ємною");
         }
         this.price = price;
     }
@@ -70,14 +61,12 @@ public class Clothes {
     }
 
     @Override
-    public String toString() {
-        return "Clothes{" +
-                "name='" + name + '\'' +
-                ", size='" + size + '\'' +
-                ", price=" + price +
-                ", quantity=" + quantity +
-                ", category=" + category.getDisplayName() +
-                '}';
+    public int compareTo(Clothes other) {
+        if (other == null) {
+            return 1;
+        }
+        // Сортування за назвою (алфавітний порядок)
+        return this.name.compareToIgnoreCase(other.name);
     }
 
     @Override
@@ -86,14 +75,24 @@ public class Clothes {
         if (o == null || getClass() != o.getClass()) return false;
         Clothes clothes = (Clothes) o;
         return Double.compare(clothes.price, price) == 0 &&
-                quantity == clothes.quantity &&
-                Objects.equals(name, clothes.name) &&
-                Objects.equals(size, clothes.size) &&
+                name.equals(clothes.name) &&
+                size.equals(clothes.size) &&
                 category == clothes.category;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, size, price, quantity, category);
+        return Objects.hash(name, size, price, category);
+    }
+
+    @Override
+    public String toString() {
+        return "Clothes{" +
+                "name='" + name + '\'' +
+                ", size='" + size + '\'' +
+                ", price=" + price +
+                ", quantity=" + quantity +
+                ", category=" + category.getDisplayName() +
+                '}';
     }
 }
