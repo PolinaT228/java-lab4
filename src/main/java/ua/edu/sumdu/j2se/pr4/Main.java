@@ -5,17 +5,25 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
- * Головний клас-драйвер для Практичної роботи №11 (Агрегація через клас Store).
+ * Головний клас-драйвер для Практичної роботи №12 (JDBC та конфігурація через args).
  */
 public class Main {
     private static final String FILE_NAME = "input.txt";
 
     public static void main(String[] args) {
-        System.out.println("==================================================");
-        System.out.println(" ПРАКТИЧНА РОБОТА №11");
-        System.out.println(" Тема: Колекції, агрегація, класи-обгортки");
+        System.out.println(" ПРАКТИЧНА РОБОТА №12");
+        System.out.println(" Тема: Збереження даних у базі даних через JDBC");
         System.out.println(" Студентка групи ІН-41/2: Таратун Поліна");
-        System.out.println("==================================================\n");
+
+        // Зчитування шляху до конфігураційного файлу через аргументи командного рядка (args)
+        String configPath = "app.properties";
+        if (args.length > 0 && args[0] != null && !args[0].trim().isEmpty()) {
+            configPath = args[0];
+        }
+        System.out.println("Використовується конфігураційний файл: " + configPath);
+
+        // Ініціалізація менеджера бази даних
+        DatabaseManager dbManager = new DatabaseManager(configPath);
 
         Scanner scanner = new Scanner(System.in);
 
@@ -132,9 +140,10 @@ public class Main {
                             }
 
                             if (newItem != null) {
-                                // Використовуємо метод магазину згідно з вимогами завдань
                                 myStore.addNewClothes(newItem, quantity);
-                                System.out.println("Товар успішно додано (або оновлено його кількість) через Store!");
+                                // Виконання INSERT у базу даних через DatabaseManager
+                                dbManager.insertClothes(newItem);
+                                System.out.println("Товар успішно додано до каталогу та збережено в БД!");
                                 creating = false;
                             }
 
@@ -156,7 +165,6 @@ public class Main {
                     break;
 
                 case 4:
-                    // Збереження стану магазину у файл перед виходом
                     saveStoreToFile(myStore);
                     System.out.println("Дані магазину успішно збережено у файл input.txt.");
                     running = false;
@@ -170,9 +178,6 @@ public class Main {
         scanner.close();
     }
 
-    /**
-     * Підменю пошуку товарів через методи класу Store.
-     */
     private static void handleSearchMenu(Store store, Scanner scanner) {
         boolean searching = true;
         while (searching) {
@@ -256,9 +261,6 @@ public class Main {
         }
     }
 
-    /**
-     * Збереження даних магазину у файл input.txt.
-     */
     public static void saveStoreToFile(Store store) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME))) {
             for (Clothes item : store.getClothesList()) {
@@ -306,9 +308,6 @@ public class Main {
         }
     }
 
-    /**
-     * Завантаження даних магазину з файлу input.txt за допомогою методу addNewClothes.
-     */
     public static void loadStoreFromFile(Store store) {
         File file = new File(FILE_NAME);
         if (!file.exists()) {
@@ -357,7 +356,6 @@ public class Main {
                 }
 
                 if (item != null) {
-                    // Використовуємо метод addNewClothes згідно з варіантом
                     store.addNewClothes(item, quantity);
                 }
             }
