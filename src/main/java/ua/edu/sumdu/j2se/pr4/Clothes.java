@@ -1,11 +1,13 @@
 package ua.edu.sumdu.j2se.pr4;
 
 import java.util.Objects;
+import java.util.UUID;
 
 /**
- * Абстрактний батьківський клас Одяг (Clothes), що реалізує Comparable для сортування за назвою.
+ * Абстрактний батьківський клас Одяг (Clothes), що реалізує Comparable та Identifiable.
  */
-public abstract class Clothes implements Comparable<Clothes> {
+public abstract class Clothes implements Comparable<Clothes>, Identifiable {
+    protected UUID uuid;
     protected String name;
     protected String size;
     protected double price;
@@ -13,11 +15,17 @@ public abstract class Clothes implements Comparable<Clothes> {
     protected ClothingCategory category;
 
     public Clothes(String name, String size, double price, int quantity, ClothingCategory category) {
+        this.uuid = UUID.randomUUID(); // Автоматична генерація UUID
         setName(name);
         setSize(size);
         setPrice(price);
         setQuantity(quantity);
         setCategory(category);
+    }
+
+    @Override
+    public UUID getUuid() {
+        return uuid;
     }
 
     public String getName() { return name; }
@@ -60,12 +68,18 @@ public abstract class Clothes implements Comparable<Clothes> {
         this.category = category;
     }
 
+    /**
+     * Коротка інформація для відображення в списку.
+     */
+    public String getShortInfo() {
+        return getClass().getSimpleName() + ": " + name + " | UUID: " + uuid;
+    }
+
     @Override
     public int compareTo(Clothes other) {
         if (other == null) {
             return 1;
         }
-        // Сортування за назвою (алфавітний порядок)
         return this.name.compareToIgnoreCase(other.name);
     }
 
@@ -82,13 +96,14 @@ public abstract class Clothes implements Comparable<Clothes> {
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, size, price, category);
+        return Objects.hash(uuid, name, size, price, category);
     }
 
     @Override
     public String toString() {
         return "Clothes{" +
-                "name='" + name + '\'' +
+                "uuid=" + uuid +
+                ", name='" + name + '\'' +
                 ", size='" + size + '\'' +
                 ", price=" + price +
                 ", quantity=" + quantity +

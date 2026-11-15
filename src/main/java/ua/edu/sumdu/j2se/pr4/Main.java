@@ -6,15 +6,15 @@ import java.util.Comparator;
 import java.util.Scanner;
 
 /**
- * Головний клас-драйвер для Практичної роботи №15 (Lambda expressions).
+ * Головний клас-драйвер для Практичної роботи №17 (Update and Delete).
  */
 public class Main {
     private static final String FILE_NAME = "input.txt";
 
     public static void main(String[] args) {
         System.out.println("==================================================");
-        System.out.println(" ПРАКТИЧНА РОБОТА №15");
-        System.out.println(" Тема: Lambda expressions (заміна анонімних класів Comparator)");
+        System.out.println(" ПРАКТИЧНА РОБОТА №17");
+        System.out.println(" Тема: Modification and deletion of elements in collections");
         System.out.println(" Студентка групи ІН-41/2: Таратун Поліна");
         System.out.println("==================================================\n");
 
@@ -27,16 +27,18 @@ public class Main {
         boolean running = true;
 
         while (running) {
-            System.out.println("\n=== ГОЛОВНЕ МЕНЮ МАГАЗИНУ ===");
+            System.out.println("\n=== ГОЛОВНЕ МЕНЮ МАГАЗИНУ ==>");
             System.out.println("1. Пошук товару");
             System.out.println("2. Додати новий товар (або оновити кількість)");
-            System.out.println("3. Вивести інформацію про всі товари (звичайний список)");
-            System.out.println("4. Вивести відсортовану інформацію про всі товари (за критерієм через лямбда)");
-            System.out.println("5. Завершити роботу програми");
-            System.out.print("Оберіть пункт меню (1-5): ");
+            System.out.println("3. Модифікувати товар");
+            System.out.println("4. Видалити товар");
+            System.out.println("5. Вивести інформацію про всі товари (звичайний список)");
+            System.out.println("6. Вивести відсортовану інформацію про всі товари (за критерієм)");
+            System.out.println("7. Завершити роботу програми");
+            System.out.print("Оберіть пункт меню (1-7): ");
 
             if (!scanner.hasNextInt()) {
-                System.out.println("Помилка! Введіть число від 1 до 5.");
+                System.out.println("Помилка! Введіть число від 1 до 7.");
                 scanner.next();
                 continue;
             }
@@ -50,111 +52,34 @@ public class Main {
                     break;
 
                 case 2:
-                    boolean creating = true;
-                    while (creating) {
-                        System.out.println("\n--- ВИБІР ТИПУ ТОВАРУ ---");
-                        System.out.println("1. Штани (Pants)");
-                        System.out.println("2. Сорочка (Shirts)");
-                        System.out.println("3. Куртка (Jacket)");
-                        System.out.println("4. Шкарпетки (Socks)");
-                        System.out.println("5. Повернутися до головного меню");
-                        System.out.print("Оберіть тип (1-5): ");
-
-                        if (!scanner.hasNextInt()) {
-                            System.out.println("Помилка! Введіть число від 1 до 5.");
-                            scanner.next();
-                            continue;
-                        }
-
-                        int subChoice = scanner.nextInt();
-                        scanner.nextLine();
-
-                        if (subChoice == 5) {
-                            creating = false;
-                            break;
-                        }
-
-                        if (subChoice < 1 || subChoice > 4) {
-                            System.out.println("Невірний вибір! Спробуйте ще раз.");
-                            continue;
-                        }
-
-                        try {
-                            System.out.print("Введіть назву: ");
-                            String name = scanner.nextLine();
-
-                            System.out.print("Введіть розмір: ");
-                            String size = scanner.nextLine();
-
-                            System.out.print("Введіть ціну: ");
-                            double price = Double.parseDouble(scanner.nextLine());
-
-                            System.out.print("Введіть кількість для додавання: ");
-                            int quantity = Integer.parseInt(scanner.nextLine());
-
-                            System.out.println("Оберіть категорію:");
-                            ClothingCategory[] categories = ClothingCategory.values();
-                            for (int i = 0; i < categories.length; i++) {
-                                System.out.println((i + 1) + ". " + categories[i].getDisplayName());
-                            }
-                            System.out.print("Вибір (1-" + categories.length + "): ");
-                            int catIndex = Integer.parseInt(scanner.nextLine()) - 1;
-                            ClothingCategory category = categories[catIndex];
-
-                            Clothes newItem = null;
-
-                            switch (subChoice) {
-                                case 1:
-                                    System.out.print("Чи є ремінь? (true/false): ");
-                                    boolean hasBelt = Boolean.parseBoolean(scanner.nextLine());
-                                    newItem = new Pants(name, size, price, 1, category, hasBelt);
-                                    break;
-                                case 2:
-                                    System.out.print("Довжина рукава: ");
-                                    String sleeve = scanner.nextLine();
-                                    newItem = new Shirts(name, size, price, 1, category, sleeve);
-                                    break;
-                                case 3:
-                                    System.out.print("Чи є капюшон? (true/false): ");
-                                    boolean hasHood = Boolean.parseBoolean(scanner.nextLine());
-                                    newItem = new Jacket(name, size, price, 1, category, hasHood);
-                                    break;
-                                case 4:
-                                    System.out.print("Введіть матеріал: ");
-                                    String material = scanner.nextLine();
-                                    newItem = new Socks(name, size, price, 1, category, material);
-                                    break;
-                            }
-
-                            if (newItem != null) {
-                                myStore.addNewClothes(newItem, quantity);
-                                System.out.println("Товар успішно додано до каталогу!");
-                                creating = false;
-                            }
-
-                        } catch (Exception e) {
-                            System.out.println("Помилка створення об'єкта: " + e.getMessage());
-                        }
-                    }
+                    handleAddClothes(myStore, scanner);
                     break;
 
                 case 3:
+                    handleUpdateClothes(myStore, scanner);
+                    break;
+
+                case 4:
+                    handleDeleteClothes(myStore, scanner);
+                    break;
+
+                case 5:
                     if (myStore.getClothesList().isEmpty()) {
                         System.out.println("Каталог магазину порожній.");
                     } else {
                         System.out.println("\n--- Список усіх товарів у магазині ---");
-                        for (Clothes item : myStore.getClothesList()) {
-                            System.out.println(item.toString());
+                        ArrayList<Clothes> list = myStore.getClothesList();
+                        for (int i = 0; i < list.size(); i++) {
+                            System.out.println((i + 1) + ". " + list.get(i).toString());
                         }
                     }
                     break;
 
-                case 4:
-                    // Підменю вибору критерію сортування з використанням лямбда-виразів
+                case 6:
                     handleSortingMenu(myStore, scanner);
                     break;
 
-                case 5:
+                case 7:
                     saveStoreToFile(myStore);
                     System.out.println("Дані магазину успішно збережено у файл input.txt.");
                     running = false;
@@ -162,15 +87,237 @@ public class Main {
                     break;
 
                 default:
-                    System.out.println("Невірний вибір! Оберіть від 1 до 5.");
+                    System.out.println("Невірний вибір! Оберіть від 1 до 7.");
             }
         }
         scanner.close();
     }
 
+    private static void handleAddClothes(Store myStore, Scanner scanner) {
+        boolean creating = true;
+        while (creating) {
+            System.out.println("\n--- ВИБІР ТИПУ ТОВАРУ ---");
+            System.out.println("1. Штани (Pants)");
+            System.out.println("2. Сорочка (Shirts)");
+            System.out.println("3. Куртка (Jacket)");
+            System.out.println("4. Шкарпетки (Socks)");
+            System.out.println("5. Повернутися до головного меню");
+            System.out.print("Оберіть тип (1-5): ");
+
+            if (!scanner.hasNextInt()) {
+                System.out.println("Помилка! Введіть число від 1 до 5.");
+                scanner.next();
+                continue;
+            }
+
+            int subChoice = scanner.nextInt();
+            scanner.nextLine();
+
+            if (subChoice == 5) {
+                creating = false;
+                break;
+            }
+
+            if (subChoice < 1 || subChoice > 4) {
+                System.out.println("Невірний вибір! Спробуйте ще раз.");
+                continue;
+            }
+
+            try {
+                System.out.print("Введіть назву: ");
+                String name = scanner.nextLine();
+
+                System.out.print("Введіть розмір: ");
+                String size = scanner.nextLine();
+
+                System.out.print("Введіть ціну: ");
+                double price = Double.parseDouble(scanner.nextLine());
+
+                System.out.print("Введіть кількість для додавання: ");
+                int quantity = Integer.parseInt(scanner.nextLine());
+
+                System.out.println("Оберіть категорію:");
+                ClothingCategory[] categories = ClothingCategory.values();
+                for (int i = 0; i < categories.length; i++) {
+                    System.out.println((i + 1) + ". " + categories[i].getDisplayName());
+                }
+                System.out.print("Вибір (1-" + categories.length + "): ");
+                int catIndex = Integer.parseInt(scanner.nextLine()) - 1;
+                ClothingCategory category = categories[catIndex];
+
+                Clothes newItem = null;
+
+                switch (subChoice) {
+                    case 1:
+                        System.out.print("Чи є ремінь? (true/false): ");
+                        boolean hasBelt = Boolean.parseBoolean(scanner.nextLine());
+                        newItem = new Pants(name, size, price, 1, category, hasBelt);
+                        break;
+                    case 2:
+                        System.out.print("Довжина рукава: ");
+                        String sleeve = scanner.nextLine();
+                        newItem = new Shirts(name, size, price, 1, category, sleeve);
+                        break;
+                    case 3:
+                        System.out.print("Чи є капюшон? (true/false): ");
+                        boolean hasHood = Boolean.parseBoolean(scanner.nextLine());
+                        newItem = new Jacket(name, size, price, 1, category, hasHood);
+                        break;
+                    case 4:
+                        System.out.print("Введіть матеріал: ");
+                        String material = scanner.nextLine();
+                        newItem = new Socks(name, size, price, 1, category, material);
+                        break;
+                }
+
+                if (newItem != null) {
+                    myStore.addNewClothes(newItem, quantity);
+                    System.out.println("Товар успішно додано до каталогу!");
+                    creating = false;
+                }
+
+            } catch (Exception e) {
+                System.out.println("Помилка створення об'єкта: " + e.getMessage());
+            }
+        }
+    }
+
     /**
-     * Підменю вибору критеріїв сортування за допомогою лямбда-виразів.
+     * Обробка пункту меню 3: Модифікація товару.
      */
+    private static void handleUpdateClothes(Store store, Scanner scanner) {
+        ArrayList<Clothes> list = store.getClothesList();
+        if (list.isEmpty()) {
+            System.out.println("Каталог магазину порожній. Модифікація неможлива.");
+            return;
+        }
+
+        System.out.println("\n--- Оберіть товар для модифікації ---");
+        for (int i = 0; i < list.size(); i++) {
+            System.out.println((i + 1) + ". " + list.get(i).getShortInfo());
+        }
+        System.out.print("Введіть номер товару (або 0 для скасування): ");
+
+        if (!scanner.hasNextInt()) {
+            System.out.println("Помилка введення!");
+            scanner.next();
+            return;
+        }
+
+        int index = scanner.nextInt() - 1;
+        scanner.nextLine();
+
+        if (index == -1) {
+            return;
+        }
+
+        if (index < 0 || index >= list.size()) {
+            System.out.println("Невірний номер товару!");
+            return;
+        }
+
+        Clothes existingItem = list.get(index);
+        System.out.println("Вибрано товар: " + existingItem.toString());
+
+        try {
+            System.out.print("Введіть нову назву (або залиште поточну '" + existingItem.getName() + "'): ");
+            String name = scanner.nextLine();
+            if (name.trim().isEmpty()) {
+                name = existingItem.getName();
+            }
+
+            System.out.print("Введіть новий розмір (або поточний '" + existingItem.getSize() + "'): ");
+            String size = scanner.nextLine();
+            if (size.trim().isEmpty()) {
+                size = existingItem.getSize();
+            }
+
+            System.out.print("Введіть нову ціну (або поточну " + existingItem.getPrice() + "): ");
+            String priceStr = scanner.nextLine();
+            double price = priceStr.trim().isEmpty() ? existingItem.getPrice() : Double.parseDouble(priceStr);
+
+            System.out.print("Введіть нову кількість (або поточну " + existingItem.getQuantity() + "): ");
+            String qtyStr = scanner.nextLine();
+            int quantity = qtyStr.trim().isEmpty() ? existingItem.getQuantity() : Integer.parseInt(qtyStr);
+
+            // Створюємо оновлений об'єкт такого ж типу з новими даними
+            Clothes updatedItem = null;
+            if (existingItem instanceof Pants) {
+                updatedItem = new Pants(name, size, price, quantity, existingItem.getCategory(), ((Pants) existingItem).isHasBelt());
+            } else if (existingItem instanceof Shirts) {
+                updatedItem = new Shirts(name, size, price, quantity, existingItem.getCategory(), ((Shirts) existingItem).getSleeveLength());
+            } else if (existingItem instanceof Jacket) {
+                updatedItem = new Jacket(name, size, price, quantity, existingItem.getCategory(), ((Jacket) existingItem).isHasHood());
+            } else if (existingItem instanceof Socks) {
+                updatedItem = new Socks(name, size, price, quantity, existingItem.getCategory(), ((Socks) existingItem).getMaterial());
+            } else {
+                updatedItem = new Clothes(name, size, price, quantity, existingItem.getCategory()) {};
+            }
+
+            boolean success = store.update(existingItem, updatedItem);
+            if (success) {
+                System.out.println("Товар успішно модифіковано!");
+            } else {
+                System.out.println("Помилка: товар не знайдено в колекції.");
+            }
+
+        } catch (Exception e) {
+            System.out.println("Помилка при модифікації товару: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Обробка пункту меню 4: Видалення товару.
+     */
+    private static void handleDeleteClothes(Store store, Scanner scanner) {
+        ArrayList<Clothes> list = store.getClothesList();
+        if (list.isEmpty()) {
+            System.out.println("Каталог магазину порожній. Видалення неможливе.");
+            return;
+        }
+
+        System.out.println("\n--- Оберіть товар для видалення ---");
+        for (int i = 0; i < list.size(); i++) {
+            System.out.println((i + 1) + ". " + list.get(i).getShortInfo());
+        }
+        System.out.print("Введіть номер товару (або 0 для скасування): ");
+
+        if (!scanner.hasNextInt()) {
+            System.out.println("Помилка введення!");
+            scanner.next();
+            return;
+        }
+
+        int index = scanner.nextInt() - 1;
+        scanner.nextLine();
+
+        if (index == -1) {
+            return;
+        }
+
+        if (index < 0 || index >= list.size()) {
+            System.out.println("Невірний номер товару!");
+            return;
+        }
+
+        Clothes itemToDelete = list.get(index);
+        System.out.println("Вибрано для видалення: " + itemToDelete.toString());
+
+        System.out.print("Ви дійсно хочете видалити цей товар? (y/n): ");
+        String confirm = scanner.nextLine().trim();
+
+        if (confirm.equalsIgnoreCase("y") || confirm.equalsIgnoreCase("так")) {
+            boolean success = store.delete(itemToDelete);
+            if (success) {
+                System.out.println("Товар успішно видалено з каталогу!");
+            } else {
+                System.out.println("Помилка: товар не знайдено.");
+            }
+        } else {
+            System.out.println("Видалення скасовано.");
+        }
+    }
+
     private static void handleSortingMenu(Store store, Scanner scanner) {
         if (store.getClothesList().isEmpty()) {
             System.out.println("Каталог магазину порожній. Сортування неможливе.");
@@ -179,7 +326,7 @@ public class Main {
 
         boolean sorting = true;
         while (sorting) {
-            System.out.println("\n=== ОБЕРІТЬ КРИТЕРІЙ СОРТУВАННЯ (Лямбда) ===");
+            System.out.println("\n=== ОБЕРІТЬ КРИТЕРІЙ СОРТУВАННЯ ===");
             System.out.println("1. Сортувати за ціною (від дешевих до дорогих)");
             System.out.println("2. Сортувати за кількістю на складі (від меншої до більшої)");
             System.out.println("3. Сортувати за розміром (за алфавітом)");
@@ -199,24 +346,21 @@ public class Main {
 
             switch (sortChoice) {
                 case 1:
-                    // Лямбда-вираз для сортування за ціною
                     Comparator<Clothes> priceComparator = (o1, o2) -> Double.compare(o1.getPrice(), o2.getPrice());
                     sortedResult = store.getSortedClothesByComparator(priceComparator);
-                    System.out.println("\n--- Список, відсортований за ціною (Lambda) ---");
+                    System.out.println("\n--- Список, відсортований за ціною ---");
                     break;
 
                 case 2:
-                    // Лямбда-вираз для сортування за кількістю
                     Comparator<Clothes> quantityComparator = (o1, o2) -> Integer.compare(o1.getQuantity(), o2.getQuantity());
                     sortedResult = store.getSortedClothesByComparator(quantityComparator);
-                    System.out.println("\n--- Список, відсортований за кількістю (Lambda) ---");
+                    System.out.println("\n--- Список, відсортований за кількістю ---");
                     break;
 
                 case 3:
-                    // Лямбда-вираз для сортування за розміром
                     Comparator<Clothes> sizeComparator = (o1, o2) -> o1.getSize().compareToIgnoreCase(o2.getSize());
                     sortedResult = store.getSortedClothesByComparator(sizeComparator);
-                    System.out.println("\n--- Список, відсортований за розміром (Lambda) ---");
+                    System.out.println("\n--- Список, відсортований за розміром ---");
                     break;
 
                 case 0:
@@ -387,20 +531,22 @@ public class Main {
                 Clothes item = null;
                 switch (type) {
                     case "Pants":
-                        boolean hasBelt = Boolean.parseBoolean(parts[6]);
-                        item = new Pants(name, size, price, 1, category, hasBelt);
+                        String extra = parts[6];
+                        if (extra.equals("true") || extra.equals("false")) {
+                            item = new Pants(name, size, price, 1, category, Boolean.parseBoolean(extra));
+                        }
                         break;
                     case "Shirts":
-                        String sleeve = parts[6];
-                        item = new Shirts(name, size, price, 1, category, sleeve);
+                        item = new Shirts(name, size, price, 1, category, parts[6]);
                         break;
                     case "Jacket":
-                        boolean hasHood = Boolean.parseBoolean(parts[6]);
-                        item = new Jacket(name, size, price, 1, category, hasHood);
+                        String extraJ = parts[6];
+                        if (extraJ.equals("true") || extraJ.equals("false")) {
+                            item = new Jacket(name, size, price, 1, category, Boolean.parseBoolean(extraJ));
+                        }
                         break;
                     case "Socks":
-                        String material = parts[6];
-                        item = new Socks(name, size, price, 1, category, material);
+                        item = new Socks(name, size, price, 1, category, parts[6]);
                         break;
                 }
 

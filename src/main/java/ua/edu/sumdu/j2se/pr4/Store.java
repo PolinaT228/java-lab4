@@ -5,7 +5,7 @@ import java.util.Comparator;
 
 /**
  * Клас-контейнер Store (Магазин), що реалізує агрегацію колекції одягу,
- * управління кількістю, пошук та сортування за допомогою Comparator.
+ * управління кількістю, пошук, сортування, модифікацію та видалення.
  */
 public class Store {
     private String storeName;
@@ -38,7 +38,6 @@ public class Store {
 
         boolean found = false;
         for (Clothes item : clothesList) {
-            // Перевіряємо за допомогою equals, чи такий товар вже існує
             if (item.equals(cl)) {
                 item.setQuantity(item.getQuantity() + quantity);
                 found = true;
@@ -47,10 +46,45 @@ public class Store {
         }
 
         if (!found) {
-            // Якщо товару ще немає, встановлюємо передану кількість і додаємо
             cl.setQuantity(quantity);
             clothesList.add(cl);
         }
+    }
+
+    /**
+     * Оновлює дані існуючого об'єкта в колекції.
+     */
+    public boolean update(Clothes existingObject, Clothes newObject) {
+        if (existingObject == null || newObject == null) {
+            return false;
+        }
+
+        for (int i = 0; i < clothesList.size(); i++) {
+            Clothes item = clothesList.get(i);
+            // Порівнюємо за UUID або за equals
+            if (item.getUuid().equals(existingObject.getUuid()) || item.equals(existingObject)) {
+                item.setName(newObject.getName());
+                item.setSize(newObject.getSize());
+                item.setPrice(newObject.getPrice());
+                item.setQuantity(newObject.getQuantity());
+                item.setCategory(newObject.getCategory());
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Видаляє об'єкт з колекції.
+     */
+    public boolean delete(Clothes existingObject) {
+        if (existingObject == null) {
+            return false;
+        }
+
+        return clothesList.removeIf(item ->
+                item.getUuid().equals(existingObject.getUuid()) || item.equals(existingObject)
+        );
     }
 
     /**
