@@ -2,6 +2,7 @@ package ua.edu.sumdu.j2se.pr4;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.UUID;
 
 /**
  * Клас-контейнер Store (Магазин), що реалізує агрегацію колекції одягу,
@@ -105,5 +106,20 @@ public class Store {
             }
         }
         return result;
+    }
+
+    /**
+     * Пошук товару за унікальним ідентифікатором UUID.
+     */
+    public Clothes searchByUuid(UUID targetUuid) {
+        if (targetUuid == null) {
+            return null;
+        }
+        for (Clothes item : clothesList) {
+            if (item.getUuid().equals(targetUuid)) {
+                return item;
+            }
+        }
+        return null;
     }
 }
